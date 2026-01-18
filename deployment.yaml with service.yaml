@@ -12,10 +12,10 @@
 
 
 • kind: Pod/ Deployment/ ReplicaSet/ StatefulSet/ DaemonSet/ Service/ Ingress/ ConfigMap/ Secret/ PersistentVolume/ PersistentVolumeClaim/ Namespace/ Job/ CronJob/ HorizontalPodAutoscaler/
-      # This is a Name of resource that we want to create in file / Already present in system.     
+              # This is a Name of resource that we want to create in file or object/ Already present in system.     
  
 
-• metadata:   # This is the identifier of the file or recorce that we are creating)
+• metadata:   # This is the identifier of the file or resource that we are creating)
     + name: {Unique name for the resource}                                                       # Unique resource name (DNS compatible) / The new official name of your resource. (lowercase only, no spaces, no special characters, use - instead of space)
     + namespace: {Namespace that already created for where this file should deploy}              # Namespace (default, kube-system, custom) / Helps separate environments. (If you don’t write namespace → Kubernetes puts it in default Namespace)
   
