@@ -1,0 +1,229 @@
+• apiVersion: | apiVersion                   | Resources                                                                                                              |  # Tells K8s which API version of resource to use for this file that we creating / Already present in system.
+              | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+              | v1                           | Pod, Service, ConfigMap, Secret, Namespace, PersistentVolume, PersistentVolumeClaim, ServiceAccount, Endpoints, Node, Event, LimitRange, ResourceQuota |
+              | apps/v1                      | Deployment, ReplicaSet, StatefulSet, DaemonSet                                                                         |
+              | batch/v1                     | Job, CronJob                                                                                                           |
+              | networking.k8s.io/v1         | Ingress, NetworkPolicy, IngressClass                                                                                   |
+              | autoscaling/v2               | HorizontalPodAutoscaler                                                                                                |
+              | rbac.authorization.k8s.io/v1 | Role, ClusterRole, RoleBinding, ClusterRoleBinding                                                                     |
+              | storage.k8s.io/v1            | StorageClass, VolumeAttachment                                                                                         |
+              | policy/v1                    | PodDisruptionBudget                                                                                                    |
+              | apiextensions.k8s.io/v1      | CustomResourceDefinition                                                                                               |
+
+
+• kind: Pod/ Deployment/ ReplicaSet/ StatefulSet/ DaemonSet/ Service/ Ingress/ ConfigMap/ Secret/ PersistentVolume/ PersistentVolumeClaim/ Namespace/ Job/ CronJob/ HorizontalPodAutoscaler/
+      # This is a Name of resource that we want to create in file / Already present in system.     
+ 
+
+• metadata:   # This is the identifier of the file or recorce that we are creating)
+    + name: {Unique name for the resource}                                                       # Unique resource name (DNS compatible) / The new official name of your resource. (lowercase only, no spaces, no special characters, use - instead of space)
+    + namespace: {Namespace that already created for where this file should deploy}              # Namespace (default, kube-system, custom) / Helps separate environments. (If you don’t write namespace → Kubernetes puts it in default Namespace)
+  
+    + labels:                          # Labels are tags used to GROUP and SELECT objects. (This act as main selector for this file to execute, It work as recall at selector (if labele have many keys mention then selector do not compulsory have match the same, only lable app:___ should same in selector))  
+        - app:   
+        - tier:         
+        - env:
+                                      # Examples of lable Keys and values 
+                                         Category            | Label Key                        | Example Values
+                                         --------------------|----------------------------------|------------------------------
+                                         Application         | app                              | frontend, backend, database
+                                         Application (Std)   | app.kubernetes.io/name           | nginx, payment-service
+                                         Instance            | app.kubernetes.io/instance       | nginx-prod, api-v2
+                                         Component           | tier                             | frontend, backend, cache
+                                         Component (Std)     | app.kubernetes.io/component      | web, api, worker
+                                         Environment         | env                              | dev, qa, staging, prod
+                                         Version             | version                          | v1.0, 1.2.3, 5.7.21
+                                         Version (Std)       | app.kubernetes.io/version        | "1.25.3"
+                                         Part of App         | app.kubernetes.io/part-of        | ecommerce, banking-platform
+                                         Management          | app.kubernetes.io/managed-by     | helm, terraform, argocd
+                                         Ownership           | team                             | platform, devops, frontend
+                                         Owner               | owner                            | sre-team, payments-team
+                                         Release Strategy    | track                            | stable, canary, blue, green
+                                         Deployment Stage    | stage                            | build, deploy, test
+                                         Region              | region                           | ap-south-1, us-east-1
+                                         Zone                | zone                             | az-a, az-b
+                                         Customer / Tenant   | tenant                           | customerA, customerB
+                                         Partition           | partition                        | region-west, region-east
+                                         Resource Type       | resource-type                    | api, cronjob, worker
+                                         Criticality         | criticality                      | high, medium, low
+                                         Compliance          | compliance                       | pci, gdpr, hipaa
+                                         Lifecycle           | lifecycle                        | experimental, stable, legacy
+                                         Runtime             | runtime                          | java, nodejs, python
+     
+     
+    + annotations:                    # Non-selectable metadata (used to store non-identifying, descriptive, or operational information about a Kubernetes object) (Annotations are completely optional) (Keys and values are user-defined)
+         - owner: 
+         - purpose: 
+                                      # COMMON & REAL-WORLD ANNOTATION KEYS
+                                      Category              | Annotation Key                                 | Example Value
+                                      ----------------------|-------------------------------------------------|--------------------------------------------
+                                      Description           | description                                     | "NGINX frontend service"
+                                      Owner / Contact       | owner                                           | "devops-team"
+                                      Documentation         | documentation                                   | " https://wiki.company.com/nginx"
+                                      Build Info            | build-id                                        | "build-2026-01-15"
+                                      Git Commit            | git-commit                                      | "a3f5c9d"
+                                      Release Notes         | release-notes                                   | "Bug fixes and performance improvements"
+                                      Monitoring            | prometheus.io/scrape                            | "true"
+                                      Monitoring            | prometheus.io/port                              | "9100"
+                                      Ingress Controller    | nginx.ingress.kubernetes.io/rewrite-target      | "/"
+                                      Ingress Controller    | nginx.ingress.kubernetes.io/ssl-redirect        | "true"
+                                      Autoscaling           | autoscaling.alpha.kubernetes.io/behavior        | "scale-up-fast"
+                                      Deployment Metadata   | kubectl.kubernetes.io/last-applied-configuration| "<auto-generated>"
+                                      Service Mesh          | sidecar.istio.io/inject                         | "true"
+                                      Logging               | fluentbit.io/parser                             | "nginx"
+                                      Security              | seccomp.security.alpha.kubernetes.io/pod        | "runtime/default"
+                                      Checksum / Reload     | checksum/config                                 | "d41d8cd98f00b204e980"
+
+   
+spec:
+  replicas: 3                     # Number of Pods (0 or more)
+
+  revisionHistoryLimit: 10        # Old ReplicaSets to keep (rollback)
+
+  strategy:                       # Deployment update strategy
+    type: RollingUpdate           # RollingUpdate | Recreate
+    rollingUpdate:
+      maxSurge: 1                 # Extra pods during update (number or %)
+      maxUnavailable: 1           # Pods allowed to be unavailable
+
+  selector:                       # Deployment manages pods matching labels
+    matchLabels:
+      app: nginx
+
+  template:                       # Pod template (blueprint)
+    metadata:
+      labels:
+        app: nginx                # MUST match selector
+
+    spec:
+      restartPolicy: Always       # Always | OnFailure | Never
+                                  # (Deployments only support Always)
+
+      containers:
+      - name: nginx-container     # Container name (unique inside pod)
+
+        image: nginx:latest       # Docker image (image:tag or digest)
+
+        imagePullPolicy: IfNotPresent
+                                  # Always | IfNotPresent | Never
+
+        ports:
+        - containerPort: 80       # Port exposed by container
+          protocol: TCP           # TCP | UDP | SCTP
+
+        command:                  # Overrides Docker ENTRYPOINT
+        - /bin/sh
+        - -c
+
+        args:                     # Overrides Docker CMD
+        - "nginx -g 'daemon off;'"
+
+        env:                      # Environment variables
+        - name: ENVIRONMENT
+          value: production
+
+        - name: CONFIG_VALUE
+          valueFrom:              # Dynamic value source
+            configMapKeyRef:
+              name: app-config
+              key: config-key
+
+        - name: SECRET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: password
+
+        resources:                # Resource control (VERY IMPORTANT)
+          requests:               # Minimum guaranteed
+            cpu: "100m"           # 100 millicores
+            memory: "128Mi"
+          limits:                 # Maximum allowed
+            cpu: "500m"
+            memory: "256Mi"
+
+        volumeMounts:              # Attach volume to container
+        - name: config-volume
+          mountPath: /etc/nginx
+          readOnly: true
+
+        livenessProbe:             # Is container alive?
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+                                  # Fail → container restarted
+
+        readinessProbe:            # Ready to receive traffic?
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+                                  # Fail → traffic stopped
+
+        startupProbe:              # For slow-starting apps
+          exec:
+            command:
+            - cat
+            - /tmp/ready
+          failureThreshold: 30
+          periodSeconds: 10
+
+        securityContext:           # Container security
+          runAsUser: 1000
+          runAsGroup: 3000
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+
+      nodeSelector:                # Run on specific nodes
+        disktype: ssd
+
+      tolerations:                 # Allow tainted nodes
+      - key: "env"
+        operator: "Equal"          # Equal | Exists
+        value: "prod"
+        effect: "NoSchedule"       # NoSchedule | PreferNoSchedule | NoExecute
+
+      affinity:                    # Advanced scheduling rules
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: disktype
+                operator: In       # In | NotIn | Exists | DoesNotExist
+                values:
+                - ssd
+
+      volumes:                     # Volumes available to pod
+      - name: config-volume
+        configMap:
+          name: nginx-config
+                                  # Other types:
+                                  # secret | emptyDir | hostPath
+                                  # persistentVolumeClaim | nfs
+
+---
+# ===============================
+# SERVICE (Exposes the Pods)
+# ===============================
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: nginx-service
+
+spec:
+  type: NodePort                  # ClusterIP | NodePort | LoadBalancer | ExternalName
+
+  selector:
+    app: nginx                    # Finds pods via labels
+
+  ports:
+  - name: http
+    port: 80                      # Service port
+    targetPort: 80                # Container port
+    nodePort: 30007               # External port (NodePort only)
+    protocol: TCP
