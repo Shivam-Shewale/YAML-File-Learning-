@@ -1,4 +1,4 @@
-• apiVersion: | apiVersion                   | Resources                                                                                                              |  # Tells K8s which API version of resource to use for this file that we creating / Already present in system.
+• apiVersion: | apiVersion                   | Resources                                                                                                              |  # Tells K8s which API version of resource to use for this file or object that we creating / Already present in system.
               | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
               | v1                           | Pod, Service, ConfigMap, Secret, Namespace, PersistentVolume, PersistentVolumeClaim, ServiceAccount, Endpoints, Node, Event, LimitRange, ResourceQuota |
               | apps/v1                      | Deployment, ReplicaSet, StatefulSet, DaemonSet                                                                         |
