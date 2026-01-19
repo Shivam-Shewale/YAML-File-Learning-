@@ -10,19 +10,15 @@
               | policy/v1                    | PodDisruptionBudget                                                                                                    |
               | apiextensions.k8s.io/v1      | CustomResourceDefinition                                                                                               |
 
-
-• kind: Pod/ Deployment/ ReplicaSet/ StatefulSet/ DaemonSet/ Service/ Ingress/ ConfigMap/ Secret/ PersistentVolume/ PersistentVolumeClaim/ Namespace/ Job/ CronJob/ HorizontalPodAutoscaler/
-              # This is a Name of resource that we want to create in file or object/ Already present in system.     
- 
-
+• kind: Pod/ Deployment/ ReplicaSet/ StatefulSet/ DaemonSet/ Service/ Ingress/ ConfigMap/ Secret/ PersistentVolume/ PersistentVolumeClaim/ Namespace/ Job/ CronJob/ HorizontalPodAutoscaler/ # This is a Name of resource that we want to create in file or object/ Already present in system.   
+                
 • metadata:   # This is the identifier of the file or resource that we are creating)
-    + name: {Unique name for the resource}                                                       # Unique resource name (DNS compatible) / The new official name of your resource. (lowercase only, no spaces, no special characters, use - instead of space)
-    + namespace: {Namespace that already created for where this file should deploy}              # Namespace (default, kube-system, custom) / Helps separate environments. (If you don’t write namespace → Kubernetes puts it in default Namespace)
-  
-    + labels:                          # Labels are tags used to GROUP and SELECT objects. (This act as main selector for this file to execute, It work as recall at selector (if label have many keys mention then selector do not compulsory have match the same, only lable app:___ should same in selector))  
-        - app: nginx  
-        - tier:         
-        - env:
+     name: {Unique name for the resource}                                                       # Unique resource name (DNS compatible) / The new official name of your resource. (lowercase only, no spaces, no special characters, use - instead of space)
+     namespace: {Namespace that already created for where this file should deploy}              # Namespace (default, kube-system, custom) / Helps separate environments. (If you don’t write namespace → Kubernetes puts it in default Namespace)
+     labels:                          # Labels are tags used to GROUP and SELECT objects. (if label have many keys mention then selector do not compulsory have match the same, only lable app:___ should same in selector))  
+          app: nginx  
+          tier:         
+          env:
                                       # Examples of lable Keys and values 
                                          Category            | Label Key                        | Example Values
                                          --------------------|----------------------------------|------------------------------
@@ -50,10 +46,9 @@
                                          Lifecycle           | lifecycle                        | experimental, stable, legacy
                                          Runtime             | runtime                          | java, nodejs, python
      
-     
-    + annotations:                    # Non-selectable metadata (used to store non-identifying, descriptive, or operational information about a Kubernetes object) (Annotations are completely optional) (Keys and values are user-defined)
-         - owner:                     # WHEN TO USE ANNOTATIONS (If Kubernetes or a tool needs to read information but not select by it, use annotations) (Core Kubernetes resources function without annotations unless a specific tool requires them) (Used by tools (Ingress, Prometheus, Istio, etc.))
-         - purpose: 
+     annotations:                    # Non-selectable metadata (used to store non-identifying, descriptive, or operational information about a Kubernetes object) (Annotations are completely optional) (Keys and values are user-defined)
+          owner:                     # WHEN TO USE ANNOTATIONS (If Kubernetes or a tool needs to read information but not select by it, use annotations) (Core Kubernetes resources function without annotations unless a specific tool requires them) (Used by tools (Ingress, Prometheus, Istio, etc.))
+          purpose: 
                                       # COMMON & REAL-WORLD ANNOTATION KEYS
                                       Category              | Annotation Key                                 | Example Value
                                       ----------------------|-------------------------------------------------|--------------------------------------------
@@ -74,42 +69,46 @@
                                       Security              | seccomp.security.alpha.kubernetes.io/pod        | "runtime/default"
                                       Checksum / Reload     | checksum/config                                 | "d41d8cd98f00b204e980"
 
-   
 • spec:
-   + replicas:                     # Number of pod copies to run (0 or more) (it create multiple copies of same pod that run) 
-
-   + revisionHistoryLimit: 10        # How many OLD versions of your Deployment Kubernetes should remember (than this use for rollback, History or Debugging) (if we deploy new version of app and old was v1 v2 v3 and revisionHistoryLimit=2 then it remember v2 v3 and new deployment fail then we roll back to v3 by =kubectl rollout undo deployment [deployment name]
-
-   + strategy:                       # Deployment update strategy (How Kubernetes should update your app when you deploy a new version)
-      - type: RollingUpdate           # RollingUpdate(Default strategy and maily used)= zero downtime | Recreate = all pods killed, then recreated (Only TWO Strategy Types)
-      - rollingUpdate:
-          - maxSurge: 1                 # Extra pods runs during update (number or %)
-          - maxUnavailable: 1           # Pods allowed to be unavailable
-
-   + selector:                       # Deployment manages pods matching labels (Selector is a FILTER that picks objects using labels)
-       - matchLabels:
-            - app: nginx
-
-  template:                       # Pod template (blueprint)
-    metadata:
-      labels:
-        app: nginx                # MUST match selector
-
-    spec:
-      restartPolicy: Always       # Always | OnFailure | Never
-                                  # (Deployments only support Always)
-
-      containers:
-      - name: nginx-container     # Container name (unique inside pod)
-
-        image: nginx:latest       # Docker image (image:tag or digest)
-
-        imagePullPolicy: IfNotPresent
-                                  # Always | IfNotPresent | Never
-
-        ports:
-        - containerPort: 80       # Port exposed by container
-          protocol: TCP           # TCP | UDP | SCTP
+      replicas:                     # Number of pod copies to run (0 or more) (it create multiple copies of same pod that run) 
+      revisionHistoryLimit: 10        # How many OLD versions of your Deployment Kubernetes should remember (than this use for rollback, History or Debugging) (if we deploy new version of app and old was v1 v2 v3 and revisionHistoryLimit=2 then it remember v2 v3 and new deployment fail then we roll back to v3 by =kubectl rollout undo deployment [deployment name]
+     
+      strategy:                       # Deployment update strategy (How Kubernetes should update your app when you deploy a new version)
+          type: RollingUpdate           # RollingUpdate(Default strategy and mainly used)= zero downtime | Recreate = all pods killed, then recreated (Only TWO Strategy Types)
+          rollingUpdate:
+              maxSurge: 1                 # Extra pods runs during update (number or %)
+              maxUnavailable: 1           # Pods allowed to be unavailable
+      
+      selector:                       # Deployment manages pods matching labels (Selector is a FILTER that picks objects using labels) (This act as main selector for this file to execute, It work as recall at Template)
+            matchLabels:                # Types of Selectors (matchLabels and matchExpressions)
+               app: nginx               # This lable must match with template: Metadata: Labels
+     OR    
+            matchExpressions:
+                 {key: "from metadata: labels: (key)", operator: In, values: [value of key]} (In = Label value must be in list and that will be select)
+          OR   
+                 {key: "from metadata: labels: (key)", operator: NotIn, values: [value of key]} (NotIn = Label value must NOT be in list and that will be select)
+          OR   
+                 {key: "from metadata: labels: (key)", operator: Exists, values: [value of key]} (Exists = Label key must exist and that only will be select)
+           
+      
+      template:                       # template = blueprint (design) for Pod creation, Kubernetes uses it to create Pods again and again.(Kubernetes need Instructions on how to create Pods That instruction set is called template)
+          metadata:
+              labels:
+                  app: nginx           # This lable must match with Spec: Selector: MatchLabels
+        
+      spec:                           # Actual POD configuration and POD behavior (How Pods run, Where Pods run, What containers run inside Pods)
+         restartPolicy: Always       # tells Kubernetes what to do when a container inside a Pod stops or crashes. Always = Always restart container| OnFailure = Restart only if exit code ≠ 0| Never = Never restart container
+                                    # (Deployments only support Always)
+         
+         containers:                 # Defines what runs inside the Pod
+            - name: nginx-container     # Container name (Unique identifier for the container inside the Pod)
+              image: nginx:latest       # Tells Kubernetes which Docker image to run  (image:tag or digest)   
+              imagePullPolicy: IfNotPresent     # When Kubernetes pulls the image from registry
+                                  # Always = Pull image every time Pod starts | IfNotPresent = Pull only if image not on node| Never = Never pull (image must already exist)
+              
+              ports:                  # Declares which ports the container get network and listen to 
+                 - containerPort: 80       # Port exposed by container 
+                   protocol: TCP           # TCP | UDP | SCTP
 
         command:                  # Overrides Docker ENTRYPOINT
         - /bin/sh
