@@ -19,14 +19,14 @@
     + name: {Unique name for the resource}                                                       # Unique resource name (DNS compatible) / The new official name of your resource. (lowercase only, no spaces, no special characters, use - instead of space)
     + namespace: {Namespace that already created for where this file should deploy}              # Namespace (default, kube-system, custom) / Helps separate environments. (If you don’t write namespace → Kubernetes puts it in default Namespace)
   
-    + labels:                          # Labels are tags used to GROUP and SELECT objects. (This act as main selector for this file to execute, It work as recall at selector (if labele have many keys mention then selector do not compulsory have match the same, only lable app:___ should same in selector))  
-        - app:   
+    + labels:                          # Labels are tags used to GROUP and SELECT objects. (This act as main selector for this file to execute, It work as recall at selector (if label have many keys mention then selector do not compulsory have match the same, only lable app:___ should same in selector))  
+        - app: nginx  
         - tier:         
         - env:
                                       # Examples of lable Keys and values 
                                          Category            | Label Key                        | Example Values
                                          --------------------|----------------------------------|------------------------------
-                                         Application         | app                              | frontend, backend, database
+                                         Application         | app                              | frontend, backend, database, nginx
                                          Application (Std)   | app.kubernetes.io/name           | nginx, payment-service
                                          Instance            | app.kubernetes.io/instance       | nginx-prod, api-v2
                                          Component           | tier                             | frontend, backend, cache
@@ -52,7 +52,7 @@
      
      
     + annotations:                    # Non-selectable metadata (used to store non-identifying, descriptive, or operational information about a Kubernetes object) (Annotations are completely optional) (Keys and values are user-defined)
-         - owner: 
+         - owner:                     # WHEN TO USE ANNOTATIONS (If Kubernetes or a tool needs to read information but not select by it, use annotations) (Core Kubernetes resources function without annotations unless a specific tool requires them) (Used by tools (Ingress, Prometheus, Istio, etc.))
          - purpose: 
                                       # COMMON & REAL-WORLD ANNOTATION KEYS
                                       Category              | Annotation Key                                 | Example Value
@@ -75,20 +75,20 @@
                                       Checksum / Reload     | checksum/config                                 | "d41d8cd98f00b204e980"
 
    
-spec:
-  replicas: 3                     # Number of Pods (0 or more)
+• spec:
+   + replicas:                     # Number of pod copies to run (0 or more) (it create multiple copies of same pod that run) 
 
-  revisionHistoryLimit: 10        # Old ReplicaSets to keep (rollback)
+   + revisionHistoryLimit: 10        # How many OLD versions of your Deployment Kubernetes should remember (than this use for rollback, History or Debugging) (if we deploy new version of app and old was v1 v2 v3 and revisionHistoryLimit=2 then it remember v2 v3 and new deployment fail then we roll back to v3 by =kubectl rollout undo deployment [deployment name]
 
-  strategy:                       # Deployment update strategy
-    type: RollingUpdate           # RollingUpdate | Recreate
-    rollingUpdate:
-      maxSurge: 1                 # Extra pods during update (number or %)
-      maxUnavailable: 1           # Pods allowed to be unavailable
+   + strategy:                       # Deployment update strategy (How Kubernetes should update your app when you deploy a new version)
+      - type: RollingUpdate           # RollingUpdate(Default strategy and maily used)= zero downtime | Recreate = all pods killed, then recreated (Only TWO Strategy Types)
+      - rollingUpdate:
+          - maxSurge: 1                 # Extra pods runs during update (number or %)
+          - maxUnavailable: 1           # Pods allowed to be unavailable
 
-  selector:                       # Deployment manages pods matching labels
-    matchLabels:
-      app: nginx
+   + selector:                       # Deployment manages pods matching labels (Selector is a FILTER that picks objects using labels)
+       - matchLabels:
+            - app: nginx
 
   template:                       # Pod template (blueprint)
     metadata:
